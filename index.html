@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>KAZZAH - Login</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
@@ -357,7 +357,6 @@
         const usernameInput = document.getElementById('usernameInput');
         const errorMsg = document.getElementById('errorMsg');
 
-        // Init database kalo belum ada
         function initDatabase() {
             if (!localStorage.getItem('kazzah_db')) {
                 const db = {
@@ -375,7 +374,6 @@
                 localStorage.setItem('kazzah_db', JSON.stringify(db));
             }
 
-            // Init owner kalo belum ada
             const db = JSON.parse(localStorage.getItem('kazzah_db'));
             if (!db.users[OWNER_EMAIL]) {
                 db.users[OWNER_EMAIL] = {
@@ -414,7 +412,7 @@
                     errorMsg.textContent = '❌ Username doesn\'t match this email!';
                 }
             } else {
-                // New user - register
+                // New user - register + LANGSUNG MASUK GROUP
                 const isOwner = (email === OWNER_EMAIL && username === OWNER_USERNAME);
                 const newUser = {
                     email: email,
@@ -423,9 +421,12 @@
                     joinedAt: new Date().toISOString()
                 };
                 db.users[email] = newUser;
+                
+                // 🔥 PASTIKAN USER MASUK GROUP 🔥
                 if (!db.groups[GROUP_ID].members.includes(email)) {
                     db.groups[GROUP_ID].members.push(email);
                 }
+                
                 localStorage.setItem('kazzah_db', JSON.stringify(db));
                 localStorage.setItem('kazzah_user', JSON.stringify(newUser));
                 window.location.href = 'chat.html';
