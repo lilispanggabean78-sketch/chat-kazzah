@@ -299,6 +299,7 @@
             word-wrap: break-word;
             position: relative;
             animation: msgIn 0.2s ease;
+            color: #ffffff;  /* 🔥 TEKS PUTIH 🔥 */
         }
 
         @keyframes msgIn {
@@ -362,7 +363,7 @@
             border-left: 2px solid rgba(0, 200, 255, 0.3);
         }
 
-        /* ========== INPUT - FIXED ========== */
+        /* ========== INPUT ========== */
         .chat-input {
             padding: 8px 12px;
             background: rgba(0, 20, 40, 0.6);
@@ -415,7 +416,7 @@
             padding: 8px 0;
             background: transparent;
             border: none;
-            color: #fff;
+            color: #ffffff;
             outline: none;
             font-size: 14px;
             font-family: 'Rajdhani', sans-serif;
@@ -604,7 +605,6 @@
             }
         }
 
-        /* Fix untuk keyboard di mobile */
         @media (max-width: 540px) {
             .container {
                 height: 100dvh;
@@ -839,7 +839,6 @@
             chatInput.style.height = 'auto';
             currentReply = null;
             replyIndicator.style.display = 'none';
-            // Focus input
             setTimeout(() => chatInput.focus(), 300);
         }
 
@@ -1005,7 +1004,6 @@
                 loadPrivateChats();
             }
 
-            // Keep focus
             chatInput.focus();
         }
 
