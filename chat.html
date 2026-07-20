@@ -299,7 +299,7 @@
             word-wrap: break-word;
             position: relative;
             animation: msgIn 0.2s ease;
-            color: #ffffff;  /* 🔥 TEKS PUTIH 🔥 */
+            color: #ffffff;
         }
 
         @keyframes msgIn {
@@ -363,6 +363,14 @@
             border-left: 2px solid rgba(0, 200, 255, 0.3);
         }
 
+        .chat-messages .msg .mention {
+            color: #00d4ff;
+            font-weight: 700;
+            background: rgba(0, 200, 255, 0.1);
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+
         /* ========== INPUT ========== */
         .chat-input {
             padding: 8px 12px;
@@ -375,6 +383,7 @@
             backdrop-filter: blur(10px);
             z-index: 5;
             padding-bottom: env(safe-area-inset-bottom, 8px);
+            position: relative;
         }
 
         .chat-input .reply-indicator {
@@ -395,7 +404,8 @@
             font-weight: 700;
         }
 
-        .chat-input .input-row {
+        .chat-input .input-wrapper {
+            position: relative;
             display: flex;
             align-items: flex-end;
             gap: 8px;
@@ -406,12 +416,12 @@
             transition: all 0.3s ease;
         }
 
-        .chat-input .input-row:focus-within {
+        .chat-input .input-wrapper:focus-within {
             border-color: rgba(0, 200, 255, 0.2);
             box-shadow: 0 0 20px rgba(0, 200, 255, 0.04);
         }
 
-        .chat-input .input-row textarea {
+        .chat-input .input-wrapper textarea {
             flex: 1;
             padding: 8px 0;
             background: transparent;
@@ -427,20 +437,20 @@
             width: 100%;
         }
 
-        .chat-input .input-row textarea::placeholder {
+        .chat-input .input-wrapper textarea::placeholder {
             color: rgba(255, 255, 255, 0.15);
         }
 
-        .chat-input .input-row textarea::-webkit-scrollbar {
+        .chat-input .input-wrapper textarea::-webkit-scrollbar {
             width: 2px;
         }
 
-        .chat-input .input-row textarea::-webkit-scrollbar-thumb {
+        .chat-input .input-wrapper textarea::-webkit-scrollbar-thumb {
             background: rgba(0, 200, 255, 0.2);
             border-radius: 10px;
         }
 
-        .chat-input .input-row .send-btn {
+        .chat-input .input-wrapper .send-btn {
             padding: 8px 20px;
             border: none;
             border-radius: 50px;
@@ -457,8 +467,71 @@
             min-height: 36px;
         }
 
-        .chat-input .input-row .send-btn:active {
+        .chat-input .input-wrapper .send-btn:active {
             transform: scale(0.95);
+        }
+
+        /* ========== MENTION POPUP ========== */
+        .mention-popup {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            left: 12px;
+            right: 12px;
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid rgba(0, 200, 255, 0.1);
+            border-radius: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+            padding: 6px 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .mention-popup.show {
+            display: block;
+        }
+
+        .mention-popup .mention-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .mention-popup .mention-item:hover {
+            background: rgba(0, 200, 255, 0.06);
+        }
+
+        .mention-popup .mention-item .mention-username {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .mention-popup .mention-item .mention-owner {
+            font-size: 9px;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            color: #fff;
+            padding: 1px 10px;
+            border-radius: 50px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .mention-popup .mention-item .mention-email {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .mention-popup .mention-empty {
+            padding: 16px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 13px;
         }
 
         /* ========== MODAL ========== */
@@ -512,6 +585,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-radius: 8px;
+            color: #ffffff;  /* 🔥 USERNAME PUTIH 🔥 */
         }
 
         .modal-box .member-item:hover {
@@ -584,15 +658,15 @@
                 font-size: 11px;
                 padding: 3px 10px 3px 12px;
             }
-            .chat-input .input-row {
+            .chat-input .input-wrapper {
                 padding: 2px 4px 2px 14px;
             }
-            .chat-input .input-row textarea {
+            .chat-input .input-wrapper textarea {
                 font-size: 13px;
                 padding: 6px 0;
                 min-height: 32px;
             }
-            .chat-input .input-row .send-btn {
+            .chat-input .input-wrapper .send-btn {
                 padding: 6px 16px;
                 font-size: 9px;
                 min-height: 32px;
@@ -602,6 +676,12 @@
             }
             .modal-box {
                 padding: 18px 16px;
+            }
+            .mention-popup {
+                bottom: 55px;
+                left: 8px;
+                right: 8px;
+                max-height: 150px;
             }
         }
 
@@ -661,9 +741,14 @@
                     <span>↩ Replying: <strong id="replyToName"></strong></span>
                     <span class="cancel-reply" id="cancelReplyBtn">✕</span>
                 </div>
-                <div class="input-row">
-                    <textarea id="chatInput" placeholder="Type a message..." rows="1"></textarea>
+                <div class="input-wrapper">
+                    <textarea id="chatInput" placeholder="Type @ to mention someone..." rows="1"></textarea>
                     <button class="send-btn" id="sendBtn">SEND</button>
+                </div>
+
+                <!-- MENTION POPUP -->
+                <div class="mention-popup" id="mentionPopup">
+                    <div id="mentionList"></div>
                 </div>
             </div>
         </div>
@@ -704,6 +789,8 @@
         // ============================================================
         let currentChat = null;
         let currentReply = null;
+        let mentionActive = false;
+        let mentionUsers = [];
 
         // ============================================================
         // DOM REFS
@@ -734,12 +821,150 @@
         const memberListContainer = document.getElementById('memberListContainer');
         const closeModalBtn = document.getElementById('closeModalBtn');
 
+        const mentionPopup = document.getElementById('mentionPopup');
+        const mentionList = document.getElementById('mentionList');
+
         // ============================================================
         // AUTO-RESIZE TEXTAREA
         // ============================================================
         chatInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            handleMention();
+        });
+
+        // ============================================================
+        // MENTION SYSTEM
+        // ============================================================
+        function getGroupUsers() {
+            const db = getDB();
+            const group = db.groups[GROUP_ID];
+            const members = group.members || [];
+            const users = [];
+            members.forEach(email => {
+                if (db.users[email]) {
+                    users.push({
+                        email: email,
+                        username: db.users[email].username,
+                        isOwner: db.users[email].isOwner || false
+                    });
+                }
+            });
+            return users;
+        }
+
+        function handleMention() {
+            const text = chatInput.value;
+            const cursorPos = chatInput.selectionStart;
+            const beforeCursor = text.substring(0, cursorPos);
+            const atIndex = beforeCursor.lastIndexOf('@');
+
+            const charBeforeAt = atIndex > 0 ? text[atIndex - 1] : null;
+            const isValidMention = atIndex !== -1 &&
+                (charBeforeAt === null || charBeforeAt === ' ' || charBeforeAt === '\n');
+
+            if (isValidMention) {
+                const query = beforeCursor.substring(atIndex + 1).toLowerCase();
+                const users = getGroupUsers().filter(u => u.email !== currentUser.email);
+
+                const filtered = query ?
+                    users.filter(u => u.username.toLowerCase().includes(query)) :
+                    users;
+
+                mentionUsers = filtered;
+
+                if (filtered.length > 0) {
+                    mentionList.innerHTML = '';
+                    filtered.forEach(user => {
+                        const div = document.createElement('div');
+                        div.className = 'mention-item';
+                        div.innerHTML = `
+                            <span class="mention-username">${user.username}</span>
+                            ${user.isOwner ? '<span class="mention-owner">OWNER</span>' : ''}
+                            <span class="mention-email">${user.email}</span>
+                        `;
+                        div.onclick = () => {
+                            selectMention(user.username);
+                        };
+                        mentionList.appendChild(div);
+                    });
+                    mentionPopup.classList.add('show');
+                    mentionActive = true;
+                } else {
+                    mentionList.innerHTML = '<div class="mention-empty">No users found</div>';
+                    mentionPopup.classList.add('show');
+                    mentionActive = true;
+                }
+            } else {
+                mentionPopup.classList.remove('show');
+                mentionActive = false;
+            }
+        }
+
+        function selectMention(username) {
+            const text = chatInput.value;
+            const cursorPos = chatInput.selectionStart;
+            const beforeCursor = text.substring(0, cursorPos);
+            const atIndex = beforeCursor.lastIndexOf('@');
+            const afterCursor = text.substring(cursorPos);
+
+            const newText = beforeCursor.substring(0, atIndex) + '@' + username + ' ' + afterCursor;
+            chatInput.value = newText;
+            chatInput.focus();
+            const newPos = atIndex + username.length + 2;
+            chatInput.setSelectionRange(newPos, newPos);
+            mentionPopup.classList.remove('show');
+            mentionActive = false;
+            chatInput.dispatchEvent(new Event('input'));
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mention-popup') && !e.target.closest('.input-wrapper')) {
+                mentionPopup.classList.remove('show');
+                mentionActive = false;
+            }
+        });
+
+        chatInput.addEventListener('keydown', (e) => {
+            if (!mentionActive) return;
+
+            const items = mentionList.querySelectorAll('.mention-item');
+            let currentIndex = -1;
+            items.forEach((el, i) => {
+                if (el.classList.contains('active')) {
+                    currentIndex = i;
+                    el.classList.remove('active');
+                }
+            });
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = Math.min(currentIndex + 1, items.length - 1);
+                if (items[nextIndex]) {
+                    items[nextIndex].classList.add('active');
+                    items[nextIndex].scrollIntoView({ block: 'nearest' });
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = Math.max(currentIndex - 1, 0);
+                if (items[prevIndex]) {
+                    items[prevIndex].classList.add('active');
+                    items[prevIndex].scrollIntoView({ block: 'nearest' });
+                }
+            } else if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                const activeItem = mentionList.querySelector('.mention-item.active');
+                if (activeItem) {
+                    const username = activeItem.querySelector('.mention-username').textContent;
+                    selectMention(username);
+                } else if (items.length > 0) {
+                    const username = items[0].querySelector('.mention-username').textContent;
+                    selectMention(username);
+                }
+            } else if (e.key === 'Escape') {
+                mentionPopup.classList.remove('show');
+                mentionActive = false;
+            }
         });
 
         // ============================================================
@@ -839,6 +1064,7 @@
             chatInput.style.height = 'auto';
             currentReply = null;
             replyIndicator.style.display = 'none';
+            mentionPopup.classList.remove('show');
             setTimeout(() => chatInput.focus(), 300);
         }
 
@@ -875,6 +1101,7 @@
             chatInput.style.height = 'auto';
             currentReply = null;
             replyIndicator.style.display = 'none';
+            mentionPopup.classList.remove('show');
             setTimeout(() => chatInput.focus(), 300);
         }
 
@@ -922,7 +1149,12 @@
 
             if (data.text) {
                 const textP = document.createElement('p');
-                textP.textContent = data.text;
+                let html = data.text;
+                const mentionRegex = /@(\w+)/g;
+                html = html.replace(mentionRegex, (match, username) => {
+                    return `<span class="mention">@${username}</span>`;
+                });
+                textP.innerHTML = html;
                 div.appendChild(textP);
             }
 
@@ -999,6 +1231,7 @@
             chatInput.style.height = 'auto';
             currentReply = null;
             replyIndicator.style.display = 'none';
+            mentionPopup.classList.remove('show');
 
             if (!isGroup) {
                 loadPrivateChats();
@@ -1010,7 +1243,7 @@
         sendBtn.onclick = sendMessage;
 
         chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey && !mentionActive) {
                 e.preventDefault();
                 sendMessage();
             }
