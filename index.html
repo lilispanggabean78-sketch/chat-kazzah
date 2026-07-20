@@ -348,50 +348,18 @@
     </div>
 
     <script>
-        const OWNER_EMAIL = 'jckoomhardika21@gmail.com';
-        const OWNER_USERNAME = 'Kazzah';
-        const GROUP_ID = 'groupUtama';
+        // ============================================================
+        // 🔥 GANTI DENGAN URL VERCEL TUAN KALO UDAH DEPLOY 🔥
+        // ============================================================
+        const API_URL = 'http://localhost:3000/api';
+        // Kalo udah deploy ke Vercel, ganti jadi: https://nama-project.vercel.app/api
 
         const loginForm = document.getElementById('loginForm');
         const emailInput = document.getElementById('emailInput');
         const usernameInput = document.getElementById('usernameInput');
         const errorMsg = document.getElementById('errorMsg');
 
-        function initDatabase() {
-            if (!localStorage.getItem('kazzah_db')) {
-                const db = {
-                    users: {},
-                    groups: {
-                        [GROUP_ID]: {
-                            name: 'Group Utama',
-                            description: 'Diskusi bebas KAZZAH',
-                            members: [],
-                            messages: []
-                        }
-                    },
-                    privateChats: {}
-                };
-                localStorage.setItem('kazzah_db', JSON.stringify(db));
-            }
-
-            const db = JSON.parse(localStorage.getItem('kazzah_db'));
-            if (!db.users[OWNER_EMAIL]) {
-                db.users[OWNER_EMAIL] = {
-                    email: OWNER_EMAIL,
-                    username: OWNER_USERNAME,
-                    isOwner: true,
-                    joinedAt: new Date().toISOString()
-                };
-                if (!db.groups[GROUP_ID].members.includes(OWNER_EMAIL)) {
-                    db.groups[GROUP_ID].members.push(OWNER_EMAIL);
-                }
-                localStorage.setItem('kazzah_db', JSON.stringify(db));
-            }
-        }
-
-        initDatabase();
-
-        loginForm.onsubmit = (e) => {
+        loginForm.onsubmit = async (e) => {
             e.preventDefault();
             const email = emailInput.value.trim();
             const username = usernameInput.value.trim();
@@ -401,35 +369,25 @@
                 return;
             }
 
-            const db = JSON.parse(localStorage.getItem('kazzah_db'));
+            errorMsg.textContent = '';
 
-            if (db.users[email]) {
-                // User exists
-                if (db.users[email].username === username) {
-                    localStorage.setItem('kazzah_user', JSON.stringify(db.users[email]));
+            try {
+                const response = await fetch(`${API_URL}/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, username })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('kazzah_user', JSON.stringify(data.user));
                     window.location.href = 'chat.html';
                 } else {
-                    errorMsg.textContent = '❌ Username doesn\'t match this email!';
+                    errorMsg.textContent = data.error || 'Login gagal!';
                 }
-            } else {
-                // New user - register + LANGSUNG MASUK GROUP
-                const isOwner = (email === OWNER_EMAIL && username === OWNER_USERNAME);
-                const newUser = {
-                    email: email,
-                    username: username,
-                    isOwner: isOwner,
-                    joinedAt: new Date().toISOString()
-                };
-                db.users[email] = newUser;
-                
-                // 🔥 PASTIKAN USER MASUK GROUP 🔥
-                if (!db.groups[GROUP_ID].members.includes(email)) {
-                    db.groups[GROUP_ID].members.push(email);
-                }
-                
-                localStorage.setItem('kazzah_db', JSON.stringify(db));
-                localStorage.setItem('kazzah_user', JSON.stringify(newUser));
-                window.location.href = 'chat.html';
+            } catch (err) {
+                errorMsg.textContent = '🔥 Error: ' + err.message;
             }
         };
     </script>
