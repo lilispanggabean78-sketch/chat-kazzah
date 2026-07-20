@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KAZZAH - Chat</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0a0a12;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            height: 100vh;
+            max-height: 860px;
+            background: rgba(10, 10, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 200, 255, 0.12);
+            box-shadow: 0 0 80px rgba(0, 180, 255, 0.06), inset 0 0 80px rgba(0, 180, 255, 0.02);
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0, 180, 255, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            padding: 16px 20px;
+            background: rgba(0, 20, 40, 0.6);
+            border-bottom: 1px solid rgba(0, 200, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .header .left .title {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .header .right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .right .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px 6px 18px;
+            background: rgba(0, 200, 255, 0.06);
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .header .right .user-badge .owner-tag {
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .header .right .btn-logout {
+            padding: 6px 16px;
+            border: 1px solid rgba(255, 71, 87, 0.2);
+            background: rgba(255, 71, 87, 0.08);
+            color: #ff6b7a;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .header .right .btn-logout:hover {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: rgba(255, 71, 87, 0.4);
+            box-shadow: 0 0 30px rgba(255, 71, 87, 0.1);
+        }
+
+        /* ========== DASHBOARD ========== */
+        #dashboardPage {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .dashboard-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .dashboard-content .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            color: rgba(0, 200, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 16px 0 10px;
+            font-weight: 400;
+        }
+
+        .dashboard-content .group-card {
+            background: rgba(0, 200, 255, 0.04);
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-content .group-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.04), transparent);
+            pointer-events: none;
+        }
+
+        .dashboard-content .group-card:hover {
+            transform: translateX(6px);
+            border-color: rgba(0, 200, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 200, 255, 0.04);
+        }
+
+        .dashboard-content .group-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .dashboard-content .group-card p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .dashboard-content .group-card .member-count {
+            font-size: 12px;
+            color: rgba(0, 200, 255, 0.4);
+            margin-top: 6px;
+            display: block;
+        }
+
+        .dashboard-content .private-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-content .private-item:hover {
+            background: rgba(0, 200, 255, 0.04);
+            border-color: rgba(0, 200, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .dashboard-content .private-item .name {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .dashboard-content .private-item .badge {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .dashboard-content .empty-text {
+            color: rgba(255, 255, 255, 0.15);
+            text-align: center;
+            padding: 40px 0;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== CHAT PAGE ========== */
+        #chatPage {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .chat-header {
+            padding: 12px 16px;
+            background: rgba(0, 20, 40, 0.6);
+            border-bottom: 1px solid rgba(0, 200, 255, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header .back-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: 0.3s;
+            line-height: 1;
+        }
+
+        .chat-header .back-btn:hover {
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .chat-header .chat-title {
+            font-weight: 700;
+            font-size: 17px;
+            color: #fff;
+            flex: 1;
+        }
+
+        .chat-header .chat-title .owner-tag {
+            font-size: 10px;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 50px;
+            margin-left: 8px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+        }
+
+        .chat-header .info-btn {
+            padding: 6px 16px;
+            border: 1px solid rgba(0, 200, 255, 0.1);
+            background: rgba(0, 200, 255, 0.04);
+            color: rgba(0, 200, 255, 0.6);
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+        }
+
+        .chat-header .info-btn:hover {
+            background: rgba(0, 200, 255, 0.08);
+            border-color: rgba(0, 200, 255, 0.2);
+        }
+
+        /* ========== MESSAGES ========== */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-messages .msg {
+            max-width: 82%;
+            padding: 10px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            word-wrap: break-word;
+            position: relative;
+            animation: msgIn 0.2s ease;
+        }
+
+        @keyframes msgIn {
+            0% {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-messages .msg.self {
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.15), rgba(123, 47, 252, 0.12));
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-messages .msg.other {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-messages .msg .sender {
+            font-size: 12px;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-messages .msg .sender .owner-label {
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            color: #fff;
+            font-size: 9px;
+            padding: 1px 10px;
+            border-radius: 50px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .chat-messages .msg .time {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.2);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .chat-messages .msg .reply-ref {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            border-left: 2px solid rgba(0, 200, 255, 0.3);
+        }
+
+        /* ========== INPUT ========== */
+        .chat-input {
+            padding: 12px 16px;
+            background: rgba(0, 20, 40, 0.6);
+            border-top: 1px solid rgba(0, 200, 255, 0.04);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-input .reply-indicator {
+            width: 100%;
+            padding: 6px 12px;
+            background: rgba(0, 200, 255, 0.04);
+            border-radius: 12px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            display: none;
+            justify-content: space-between;
+            border: 1px solid rgba(0, 200, 255, 0.06);
+        }
+
+        .chat-input .reply-indicator .cancel-reply {
+            color: #ff4757;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 50px;
+            border: 1px solid rgba(0, 200, 255, 0.06);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+            font-family: 'Rajdhani', sans-serif;
+            min-width: 80px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input input[type="text"]:focus {
+            border-color: rgba(0, 200, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 200, 255, 0.04);
+        }
+
+        .chat-input input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .chat-input .send-btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .chat-input .send-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 40px rgba(0, 200, 255, 0.15);
+        }
+
+        .chat-input .send-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 99;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 380px;
+            width: 92%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 0 60px rgba(0, 180, 255, 0.04);
+        }
+
+        .modal-box h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-box .modal-sub {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .modal-box .member-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .modal-box .member-item:hover {
+            background: rgba(0, 200, 255, 0.04);
+        }
+
+        .modal-box .member-item .owner-label {
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            color: #fff;
+            padding: 1px 12px;
+            border-radius: 50px;
+            font-size: 9px;
+            font-weight: 700;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .modal-box .member-item .chat-btn {
+            padding: 4px 16px;
+            border: 1px solid rgba(0, 200, 255, 0.1);
+            background: rgba(0, 200, 255, 0.04);
+            color: rgba(0, 200, 255, 0.6);
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .modal-box .member-item .chat-btn:hover {
+            background: rgba(0, 200, 255, 0.08);
+            border-color: rgba(0, 200, 255, 0.2);
+        }
+
+        .modal-box .close-modal {
+            margin-top: 16px;
+            padding: 12px;
+            border: 1px solid rgba(255, 71, 87, 0.1);
+            background: rgba(255, 71, 87, 0.04);
+            color: #ff6b7a;
+            border-radius: 50px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+        }
+
+        .modal-box .close-modal:hover {
+            background: rgba(255, 71, 87, 0.08);
+            border-color: rgba(255, 71, 87, 0.2);
+        }
+
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 200, 255, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 200, 255, 0.4);
+        }
+
+        @media (max-width: 540px) {
+            .container {
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            .header .right .user-badge {
+                font-size: 12px;
+                padding: 4px 12px 4px 14px;
+            }
+            .chat-input input[type="text"] {
+                min-width: 60px;
+                font-size: 13px;
+                padding: 10px 14px;
+            }
+            .chat-input .send-btn {
+                padding: 10px 18px;
+                font-size: 10px;
+            }
+            .dashboard-content {
+                padding: 12px 16px;
+            }
+            .modal-box {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="left">
+                <span class="title">✦ KAZZAH</span>
+            </div>
+            <div class="right">
+                <span class="user-badge" id="headerBadge">
+                    <span id="headerUsername">User</span>
+                    <span class="owner-tag" id="headerOwnerTag" style="display:none;">⚡ OWNER</span>
+                </span>
+                <button class="btn-logout" id="logoutBtn">✕ EXIT</button>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboardPage">
+            <div class="dashboard-content" id="dashContent">
+                <div class="section-title">▸ Group</div>
+                <div class="group-card" id="groupCard">
+                    <h3>🏠 Group Utama</h3>
+                    <p id="groupDesc">Diskusi bebas KAZZAH</p>
+                    <span class="member-count" id="groupMemberCount">⚡ 0 member</span>
+                </div>
+
+                <div class="section-title">▸ Private Chats</div>
+                <div id="privateList">
+                    <div class="empty-text">✦ No private chats yet<br /><span style="font-size:12px;color:rgba(255,255,255,0.08);">Click info group to start</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHAT PAGE -->
+        <div id="chatPage">
+            <div class="chat-header">
+                <button class="back-btn" id="chatBackBtn">‹</button>
+                <span class="chat-title" id="chatTitle">Group</span>
+                <button class="info-btn" id="infoBtn">✦ INFO</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <div class="reply-indicator" id="replyIndicator">
+                    <span>↩ Replying: <strong id="replyToName"></strong></span>
+                    <span class="cancel-reply" id="cancelReplyBtn">✕</span>
+                </div>
+                <input type="text" id="chatInput" placeholder="Type a message..." />
+                <button class="send-btn" id="sendBtn">SEND</button>
+            </div>
+        </div>
+
+        <!-- MODAL INFO -->
+        <div class="modal-overlay" id="infoModal">
+            <div class="modal-box">
+                <h3>✦ ALL USERS</h3>
+                <div class="modal-sub">Click a user to start private chat</div>
+                <div id="memberListContainer"></div>
+                <button class="close-modal" id="closeModalBtn">CLOSE</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // DATABASE HELPER
+        // ============================================================
+        function getDB() {
+            return JSON.parse(localStorage.getItem('kazzah_db'));
+        }
+
+        function saveDB(db) {
+            localStorage.setItem('kazzah_db', JSON.stringify(db));
+        }
+
+        const GROUP_ID = 'groupUtama';
+        const currentUser = JSON.parse(localStorage.getItem('kazzah_user'));
+
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentChat = null; // 'group' or email target
+        let currentReply = null;
+
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const headerUsername = document.getElementById('headerUsername');
+        const headerOwnerTag = document.getElementById('headerOwnerTag');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const dashboardPage = document.getElementById('dashboardPage');
+        const chatPage = document.getElementById('chatPage');
+
+        const groupCard = document.getElementById('groupCard');
+        const groupDesc = document.getElementById('groupDesc');
+        const groupMemberCount = document.getElementById('groupMemberCount');
+        const privateList = document.getElementById('privateList');
+
+        const chatBackBtn = document.getElementById('chatBackBtn');
+        const chatTitle = document.getElementById('chatTitle');
+        const infoBtn = document.getElementById('infoBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const replyIndicator = document.getElementById('replyIndicator');
+        const replyToName = document.getElementById('replyToName');
+        const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+
+        const infoModal = document.getElementById('infoModal');
+        const memberListContainer = document.getElementById('memberListContainer');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // ============================================================
+        // HEADER
+        // ============================================================
+        headerUsername.textContent = currentUser.username;
+        if (currentUser.isOwner) {
+            headerOwnerTag.style.display = 'inline';
+        }
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        logoutBtn.onclick = () => {
+            if (confirm('Exit KAZZAH?')) {
+                localStorage.removeItem('kazzah_user');
+                window.location.href = 'index.html';
+            }
+        };
+
+        // ============================================================
+        // DASHBOARD
+        // ============================================================
+        function showDashboard() {
+            dashboardPage.style.display = 'flex';
+            chatPage.style.display = 'none';
+            loadDashboard();
+        }
+
+        function loadDashboard() {
+            const db = getDB();
+            const group = db.groups[GROUP_ID];
+
+            groupDesc.textContent = group.description || 'Diskusi bebas KAZZAH';
+            groupMemberCount.textContent = `⚡ ${(group.members || []).length} member`;
+
+            loadPrivateChats();
+        }
+
+        function loadPrivateChats() {
+            const db = getDB();
+            const myEmail = currentUser.email;
+            const privateKeys = Object.keys(db.privateChats || {});
+            const myPrivateChats = [];
+
+            privateKeys.forEach(key => {
+                const [email1, email2] = key.split('_');
+                if (email1 === myEmail || email2 === myEmail) {
+                    const targetEmail = email1 === myEmail ? email2 : email1;
+                    const messages = db.privateChats[key] || [];
+                    const lastMsg = messages.length > 0 ? messages[messages.length - 1].text : 'Start chat';
+                    const targetUser = db.users[targetEmail];
+                    if (targetUser) {
+                        myPrivateChats.push({
+                            targetEmail,
+                            targetUsername: targetUser.username,
+                            targetIsOwner: targetUser.isOwner || false,
+                            lastMessage: lastMsg
+                        });
+                    }
+                }
+            });
+
+            if (myPrivateChats.length === 0) {
+                privateList.innerHTML =
+                    '<div class="empty-text">✦ No private chats yet<br /><span style="font-size:12px;color:rgba(255,255,255,0.08);">Click info group to start</span></div>';
+                return;
+            }
+
+            privateList.innerHTML = '';
+            myPrivateChats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'private-item';
+                div.innerHTML = `
+                    <span class="name">${chat.targetUsername} ${chat.targetIsOwner ? '⚡' : ''}</span>
+                    <span class="badge">${chat.lastMessage}</span>
+                `;
+                div.onclick = () => openPrivateChat(chat.targetEmail);
+                privateList.appendChild(div);
+            });
+        }
+
+        // ============================================================
+        // GROUP CHAT
+        // ============================================================
+        groupCard.onclick = () => openGroupChat();
+
+        function openGroupChat() {
+            currentChat = 'group';
+            dashboardPage.style.display = 'none';
+            chatPage.style.display = 'flex';
+            chatTitle.textContent = '🏠 Group Utama';
+            infoBtn.style.display = 'inline-block';
+
+            loadGroupMessages();
+            chatInput.value = '';
+            currentReply = null;
+            replyIndicator.style.display = 'none';
+        }
+
+        function loadGroupMessages() {
+            const db = getDB();
+            const messages = db.groups[GROUP_ID].messages || [];
+            chatMessages.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg));
+            scrollToBottom();
+        }
+
+        // ============================================================
+        // PRIVATE CHAT
+        // ============================================================
+        function openPrivateChat(targetEmail) {
+            currentChat = targetEmail;
+            dashboardPage.style.display = 'none';
+            chatPage.style.display = 'flex';
+            infoBtn.style.display = 'none';
+
+            const db = getDB();
+            const targetUser = db.users[targetEmail];
+            if (targetUser) {
+                chatTitle.textContent = `💌 ${targetUser.username}`;
+                if (targetUser.isOwner) {
+                    chatTitle.innerHTML = `💌 ${targetUser.username} <span class="owner-tag">⚡ OWNER</span>`;
+                }
+            } else {
+                chatTitle.textContent = '💌 Private Chat';
+            }
+
+            loadPrivateMessages(targetEmail);
+            chatInput.value = '';
+            currentReply = null;
+            replyIndicator.style.display = 'none';
+        }
+
+        function getPrivateChatId(email1, email2) {
+            return [email1, email2].sort().join('_');
+        }
+
+        function loadPrivateMessages(targetEmail) {
+            const chatId = getPrivateChatId(currentUser.email, targetEmail);
+            const db = getDB();
+            const messages = db.privateChats[chatId] || [];
+            chatMessages.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg));
+            scrollToBottom();
+        }
+
+        // ============================================================
+        // APPEND MESSAGE
+        // ============================================================
+        function appendMessage(data) {
+            const div = document.createElement('div');
+            div.className = 'msg';
+            div.dataset.msgId = data.id;
+            const isSelf = data.senderEmail === currentUser.email;
+            if (isSelf) div.classList.add('self');
+            else div.classList.add('other');
+
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'sender';
+            senderDiv.textContent = data.senderUsername || 'Unknown';
+            if (data.senderIsOwner) {
+                const label = document.createElement('span');
+                label.className = 'owner-label';
+                label.textContent = '⚡ OWNER';
+                senderDiv.appendChild(label);
+            }
+            div.appendChild(senderDiv);
+
+            if (data.replyTo) {
+                const replyDiv = document.createElement('div');
+                replyDiv.className = 'reply-ref';
+                replyDiv.innerHTML = `↩ <strong>${data.replyTo.sender}</strong>: ${data.replyTo.text}`;
+                div.appendChild(replyDiv);
+            }
+
+            if (data.text) {
+                const textP = document.createElement('p');
+                textP.textContent = data.text;
+                div.appendChild(textP);
+            }
+
+            const timeSpan = document.createElement('div');
+            timeSpan.className = 'time';
+            if (data.timestamp) {
+                const d = new Date(data.timestamp);
+                timeSpan.textContent = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            }
+            div.appendChild(timeSpan);
+
+            if (!isSelf) {
+                div.style.cursor = 'pointer';
+                div.onclick = () => {
+                    currentReply = {
+                        id: data.id,
+                        sender: data.senderUsername || 'Unknown',
+                        text: data.text || '[Media]'
+                    };
+                    replyIndicator.style.display = 'flex';
+                    replyToName.textContent = currentReply.sender;
+                };
+            }
+
+            chatMessages.appendChild(div);
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+
+        // ============================================================
+        // SEND MESSAGE
+        // ============================================================
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            const isGroup = currentChat === 'group';
+            const targetEmail = isGroup ? null : currentChat;
+
+            const db = getDB();
+            const msgData = {
+                id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                senderEmail: currentUser.email,
+                senderUsername: currentUser.username,
+                senderIsOwner: currentUser.isOwner,
+                text: text,
+                replyTo: currentReply ? {
+                    id: currentReply.id,
+                    sender: currentReply.sender,
+                    text: currentReply.text
+                } : null,
+                timestamp: new Date().toISOString()
+            };
+
+            if (isGroup) {
+                db.groups[GROUP_ID].messages = db.groups[GROUP_ID].messages || [];
+                db.groups[GROUP_ID].messages.push(msgData);
+            } else {
+                const chatId = getPrivateChatId(currentUser.email, targetEmail);
+                db.privateChats[chatId] = db.privateChats[chatId] || [];
+                db.privateChats[chatId].push(msgData);
+                // Update last message
+                db.privateChats[chatId].lastMessage = text;
+            }
+
+            saveDB(db);
+
+            // Append locally
+            appendMessage(msgData);
+            scrollToBottom();
+
+            chatInput.value = '';
+            currentReply = null;
+            replyIndicator.style.display = 'none';
+
+            // Update dashboard if needed
+            if (!isGroup) {
+                loadPrivateChats();
+            }
+        }
+
+        sendBtn.onclick = sendMessage;
+        chatInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        cancelReplyBtn.onclick = () => {
+            currentReply = null;
+            replyIndicator.style.display = 'none';
+        };
+
+        // ============================================================
+        // BACK TO DASHBOARD
+        // ============================================================
+        chatBackBtn.onclick = () => {
+            showDashboard();
+            loadPrivateChats();
+        };
+
+        // ============================================================
+        // INFO GROUP - ALL USERS
+        // ============================================================
+        infoBtn.onclick = () => {
+            infoModal.classList.add('show');
+            loadAllUsers();
+        };
+
+        function loadAllUsers() {
+            const db = getDB();
+            const users = Object.values(db.users);
+
+            users.sort((a, b) => {
+                if (a.isOwner && !b.isOwner) return -1;
+                if (!a.isOwner && b.isOwner) return 1;
+                return a.username.localeCompare(b.username);
+            });
+
+            memberListContainer.innerHTML = '';
+            users.forEach(user => {
+                const div = document.createElement('div');
+                div.className = 'member-item';
+                const isSelf = user.email === currentUser.email;
+                div.innerHTML = `
+                    <span>${user.username} ${user.isOwner ? '⚡' : ''}</span>
+                    <span>
+                        ${user.isOwner ? '<span class="owner-label">OWNER</span>' : ''}
+                        ${isSelf ? '<span style="color:rgba(255,255,255,0.15);font-size:11px;margin-left:6px;">(you)</span>' : ''}
+                    </span>
+                `;
+                if (!isSelf) {
+                    const chatBtn = document.createElement('button');
+                    chatBtn.className = 'chat-btn';
+                    chatBtn.textContent = '✦ CHAT';
+                    chatBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        infoModal.classList.remove('show');
+                        openPrivateChat(user.email);
+                    };
+                    div.appendChild(chatBtn);
+                    div.style.cursor = 'pointer';
+                    div.onclick = () => {
+                        infoModal.classList.remove('show');
+                        openPrivateChat(user.email);
+                    };
+                }
+                memberListContainer.appendChild(div);
+            });
+        }
+
+        closeModalBtn.onclick = () => infoModal.classList.remove('show');
+        infoModal.onclick = (e) => {
+            if (e.target === infoModal) infoModal.classList.remove('show');
+        };
+
+        // ============================================================
+        // AUTO REFRESH (fake real-time)
+        // ============================================================
+        function autoRefresh() {
+            // Refresh messages if in chat
+            if (chatPage.style.display === 'flex') {
+                if (currentChat === 'group') {
+                    const db = getDB();
+                    const messages = db.groups[GROUP_ID].messages || [];
+                    // Simple check: if new messages, reload
+                    const currentMsgCount = chatMessages.querySelectorAll('.msg').length;
+                    if (messages.length !== currentMsgCount) {
+                        loadGroupMessages();
+                    }
+                } else if (currentChat && currentChat !== 'group') {
+                    const chatId = getPrivateChatId(currentUser.email, currentChat);
+                    const db = getDB();
+                    const messages = db.privateChats[chatId] || [];
+                    const currentMsgCount = chatMessages.querySelectorAll('.msg').length;
+                    if (messages.length !== currentMsgCount) {
+                        loadPrivateMessages(currentChat);
+                    }
+                }
+            }
+            // Refresh private list if in dashboard
+            if (dashboardPage.style.display === 'flex') {
+                loadPrivateChats();
+            }
+        }
+
+        setInterval(autoRefresh, 3000);
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        showDashboard();
+
+        console.log('🔥 KAZZAH NEON active, Yang Mulia!');
+        console.log(`👑 Owner: ${currentUser.isOwner ? 'YES' : 'NO'}`);
+    </script>
+
+</body>
+</html>
