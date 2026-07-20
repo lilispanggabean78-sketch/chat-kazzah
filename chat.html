@@ -37,7 +37,7 @@
             display: flex;
             flex-direction: column;
             border: 1px solid rgba(0, 200, 255, 0.12);
-            box-shadow: 0 0 80px rgba(0, 180, 255, 0.06);
+            box-shadow: 0 0 80px rgba(0, 180, 255, 0.06), inset 0 0 80px rgba(0, 180, 255, 0.02);
             position: relative;
             overflow: hidden;
         }
@@ -117,6 +117,12 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
+        .header .right .btn-logout:hover {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: rgba(255, 71, 87, 0.4);
+            box-shadow: 0 0 30px rgba(255, 71, 87, 0.1);
+        }
+
         /* ========== DASHBOARD ========== */
         #dashboardPage {
             display: flex;
@@ -156,6 +162,7 @@
         .dashboard-content .group-card:hover {
             transform: translateX(4px);
             border-color: rgba(0, 200, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 200, 255, 0.04);
         }
 
         .dashboard-content .group-card h3 {
@@ -192,6 +199,7 @@
 
         .dashboard-content .private-item:hover {
             background: rgba(0, 200, 255, 0.04);
+            border-color: rgba(0, 200, 255, 0.1);
         }
 
         .dashboard-content .private-item .name {
@@ -211,6 +219,7 @@
             padding: 30px 0;
             font-size: 13px;
             font-weight: 300;
+            letter-spacing: 0.5px;
         }
 
         /* ========== CHAT PAGE ========== */
@@ -243,6 +252,12 @@
             cursor: pointer;
             padding: 0 2px;
             line-height: 1;
+            transition: 0.3s;
+        }
+
+        .chat-header .back-btn:hover {
+            color: #fff;
+            transform: scale(1.1);
         }
 
         .chat-header .chat-title {
@@ -277,6 +292,11 @@
             font-family: 'Rajdhani', sans-serif;
             font-weight: 600;
             flex-shrink: 0;
+        }
+
+        .chat-header .info-btn:hover {
+            background: rgba(0, 200, 255, 0.08);
+            border-color: rgba(0, 200, 255, 0.2);
         }
 
         /* ========== MESSAGES ========== */
@@ -467,6 +487,11 @@
             min-height: 36px;
         }
 
+        .chat-input .input-wrapper .send-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(0, 200, 255, 0.15);
+        }
+
         .chat-input .input-wrapper .send-btn:active {
             transform: scale(0.95);
         }
@@ -521,8 +546,6 @@
             border-radius: 50px;
             font-family: 'Orbitron', monospace;
         }
-
-        /* 🔥 EMAIL DIHAPUS DARI MENTION 🔥 */
 
         .mention-popup .mention-empty {
             padding: 16px;
@@ -614,6 +637,7 @@
 
         .modal-box .member-item .chat-btn:hover {
             background: rgba(0, 200, 255, 0.08);
+            border-color: rgba(0, 200, 255, 0.2);
         }
 
         .modal-box .close-modal {
@@ -633,6 +657,7 @@
 
         .modal-box .close-modal:hover {
             background: rgba(255, 71, 87, 0.08);
+            border-color: rgba(255, 71, 87, 0.2);
         }
 
         ::-webkit-scrollbar {
@@ -644,6 +669,9 @@
         ::-webkit-scrollbar-thumb {
             background: rgba(0, 200, 255, 0.2);
             border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 200, 255, 0.4);
         }
 
         @media (max-width: 540px) {
@@ -764,15 +792,10 @@
 
     <script>
         // ============================================================
-        // DATABASE HELPER
+        // 🔥 GANTI DENGAN URL VERCEL TUAN KALO UDAH DEPLOY 🔥
         // ============================================================
-        function getDB() {
-            return JSON.parse(localStorage.getItem('kazzah_db'));
-        }
-
-        function saveDB(db) {
-            localStorage.setItem('kazzah_db', JSON.stringify(db));
-        }
+        const API_URL = 'http://localhost:3000/api';
+        // Kalo udah deploy ke Vercel, ganti jadi: https://nama-project.vercel.app/api
 
         const GROUP_ID = 'groupUtama';
         const currentUser = JSON.parse(localStorage.getItem('kazzah_user'));
@@ -788,6 +811,7 @@
         let currentReply = null;
         let mentionActive = false;
         let mentionUsers = [];
+        let pollingInterval = null;
 
         // ============================================================
         // DOM REFS
@@ -831,27 +855,27 @@
         });
 
         // ============================================================
-        // MENTION SYSTEM - HANYA GROUP
+        // MENTION SYSTEM
         // ============================================================
-        function getGroupUsers() {
-            const db = getDB();
-            const group = db.groups[GROUP_ID];
-            const members = group.members || [];
-            const users = [];
-            members.forEach(email => {
-                if (db.users[email]) {
-                    users.push({
-                        email: email,
-                        username: db.users[email].username,
-                        isOwner: db.users[email].isOwner || false
-                    });
+        async function getGroupUsers() {
+            try {
+                const res = await fetch(`${API_URL}/group`);
+                const group = await res.json();
+                const members = group.members || [];
+                const users = [];
+                for (const email of members) {
+                    const userRes = await fetch(`${API_URL}/users`);
+                    const data = await userRes.json();
+                    const user = data.users.find(u => u.email === email);
+                    if (user) users.push(user);
                 }
-            });
-            return users;
+                return users;
+            } catch (e) {
+                return [];
+            }
         }
 
         function handleMention() {
-            // Mention hanya aktif di GROUP CHAT
             if (currentChat !== 'group') {
                 mentionPopup.classList.remove('show');
                 mentionActive = false;
@@ -869,35 +893,35 @@
 
             if (isValidMention) {
                 const query = beforeCursor.substring(atIndex + 1).toLowerCase();
-                const users = getGroupUsers().filter(u => u.email !== currentUser.email);
 
-                const filtered = query ?
-                    users.filter(u => u.username.toLowerCase().includes(query)) :
-                    users;
+                getGroupUsers().then(users => {
+                    const filtered = users.filter(u =>
+                        u.email !== currentUser.email &&
+                        u.username.toLowerCase().includes(query)
+                    );
 
-                mentionUsers = filtered;
-
-                if (filtered.length > 0) {
-                    mentionList.innerHTML = '';
-                    filtered.forEach(user => {
-                        const div = document.createElement('div');
-                        div.className = 'mention-item';
-                        div.innerHTML = `
-                            <span class="mention-username">${user.username}</span>
-                            ${user.isOwner ? '<span class="mention-owner">OWNER</span>' : ''}
-                        `;
-                        div.onclick = () => {
-                            selectMention(user.username);
-                        };
-                        mentionList.appendChild(div);
-                    });
-                    mentionPopup.classList.add('show');
-                    mentionActive = true;
-                } else {
-                    mentionList.innerHTML = '<div class="mention-empty">No users found</div>';
-                    mentionPopup.classList.add('show');
-                    mentionActive = true;
-                }
+                    if (filtered.length > 0) {
+                        mentionList.innerHTML = '';
+                        filtered.forEach(user => {
+                            const div = document.createElement('div');
+                            div.className = 'mention-item';
+                            div.innerHTML = `
+                                <span class="mention-username">${user.username}</span>
+                                ${user.isOwner ? '<span class="mention-owner">OWNER</span>' : ''}
+                            `;
+                            div.onclick = () => {
+                                selectMention(user.username);
+                            };
+                            mentionList.appendChild(div);
+                        });
+                        mentionPopup.classList.add('show');
+                        mentionActive = true;
+                    } else {
+                        mentionList.innerHTML = '<div class="mention-empty">No users found</div>';
+                        mentionPopup.classList.add('show');
+                        mentionActive = true;
+                    }
+                });
             } else {
                 mentionPopup.classList.remove('show');
                 mentionActive = false;
@@ -994,60 +1018,48 @@
         function showDashboard() {
             dashboardPage.style.display = 'flex';
             chatPage.style.display = 'none';
+            if (pollingInterval) clearInterval(pollingInterval);
             loadDashboard();
         }
 
-        function loadDashboard() {
-            const db = getDB();
-            const group = db.groups[GROUP_ID];
-
-            groupDesc.textContent = group.description || 'Diskusi bebas KAZZAH';
-            groupMemberCount.textContent = `⚡ ${(group.members || []).length} member`;
-
+        async function loadDashboard() {
+            try {
+                const groupRes = await fetch(`${API_URL}/group`);
+                const group = await groupRes.json();
+                groupDesc.textContent = group.description || 'Diskusi bebas KAZZAH';
+                groupMemberCount.textContent = `⚡ ${(group.members || []).length} member`;
+            } catch (e) {
+                console.error('Load group error:', e);
+            }
             loadPrivateChats();
         }
 
-        function loadPrivateChats() {
-            const db = getDB();
-            const myEmail = currentUser.email;
-            const privateKeys = Object.keys(db.privateChats || {});
-            const myPrivateChats = [];
+        async function loadPrivateChats() {
+            try {
+                const res = await fetch(`${API_URL}/private/chats?email=${currentUser.email}`);
+                const data = await res.json();
+                const chats = data.chats || [];
 
-            privateKeys.forEach(key => {
-                const [email1, email2] = key.split('_');
-                if (email1 === myEmail || email2 === myEmail) {
-                    const targetEmail = email1 === myEmail ? email2 : email1;
-                    const messages = db.privateChats[key] || [];
-                    const lastMsg = messages.length > 0 ? messages[messages.length - 1].text : 'Start chat';
-                    const targetUser = db.users[targetEmail];
-                    if (targetUser) {
-                        myPrivateChats.push({
-                            targetEmail,
-                            targetUsername: targetUser.username,
-                            targetIsOwner: targetUser.isOwner || false,
-                            lastMessage: lastMsg
-                        });
-                    }
+                if (chats.length === 0) {
+                    privateList.innerHTML =
+                        '<div class="empty-text">✦ No private chats yet<br><span style="font-size:11px;color:rgba(255,255,255,0.08);">Click info group to start</span></div>';
+                    return;
                 }
-            });
 
-            if (myPrivateChats.length === 0) {
-                privateList.innerHTML =
-                    '<div class="empty-text">✦ No private chats yet<br><span style="font-size:11px;color:rgba(255,255,255,0.08);">Click info group to start</span></div>';
-                return;
+                privateList.innerHTML = '';
+                chats.forEach(chat => {
+                    const div = document.createElement('div');
+                    div.className = 'private-item';
+                    div.innerHTML = `
+                        <span class="name">${chat.targetUsername} ${chat.targetIsOwner ? '⚡' : ''}</span>
+                        <span class="badge">${chat.lastMessage}</span>
+                    `;
+                    div.onclick = () => openPrivateChat(chat.targetEmail);
+                    privateList.appendChild(div);
+                });
+            } catch (e) {
+                console.error('Load private chats error:', e);
             }
-
-            privateList.innerHTML = '';
-            myPrivateChats.forEach(chat => {
-                const div = document.createElement('div');
-                div.className = 'private-item';
-                div.innerHTML = `
-                    <span class="name">${chat.targetUsername} ${chat.targetIsOwner ? '⚡' : ''}</span>
-                    <span class="badge">${chat.lastMessage}</span>
-                `;
-                div.onclick = () => openPrivateChat(chat.targetEmail);
-                privateList.appendChild(div);
-            });
         }
 
         // ============================================================
@@ -1068,15 +1080,20 @@
             currentReply = null;
             replyIndicator.style.display = 'none';
             mentionPopup.classList.remove('show');
+            startPolling();
             setTimeout(() => chatInput.focus(), 300);
         }
 
-        function loadGroupMessages() {
-            const db = getDB();
-            const messages = db.groups[GROUP_ID].messages || [];
-            chatMessages.innerHTML = '';
-            messages.forEach(msg => appendMessage(msg));
-            scrollToBottom();
+        async function loadGroupMessages() {
+            try {
+                const res = await fetch(`${API_URL}/group/messages`);
+                const data = await res.json();
+                chatMessages.innerHTML = '';
+                (data.messages || []).forEach(msg => appendMessage(msg));
+                scrollToBottom();
+            } catch (e) {
+                console.error('Load messages error:', e);
+            }
         }
 
         // ============================================================
@@ -1088,16 +1105,19 @@
             chatPage.style.display = 'flex';
             infoBtn.style.display = 'none';
 
-            const db = getDB();
-            const targetUser = db.users[targetEmail];
-            if (targetUser) {
-                chatTitle.textContent = `💌 ${targetUser.username}`;
-                if (targetUser.isOwner) {
-                    chatTitle.innerHTML = `💌 ${targetUser.username} <span class="owner-tag">⚡ OWNER</span>`;
-                }
-            } else {
-                chatTitle.textContent = '💌 Private Chat';
-            }
+            fetch(`${API_URL}/users`)
+                .then(r => r.json())
+                .then(data => {
+                    const user = data.users.find(u => u.email === targetEmail);
+                    if (user) {
+                        chatTitle.textContent = `💌 ${user.username}`;
+                        if (user.isOwner) {
+                            chatTitle.innerHTML = `💌 ${user.username} <span class="owner-tag">⚡ OWNER</span>`;
+                        }
+                    } else {
+                        chatTitle.textContent = '💌 Private Chat';
+                    }
+                });
 
             loadPrivateMessages(targetEmail);
             chatInput.value = '';
@@ -1105,20 +1125,57 @@
             currentReply = null;
             replyIndicator.style.display = 'none';
             mentionPopup.classList.remove('show');
+            startPolling();
             setTimeout(() => chatInput.focus(), 300);
         }
 
-        function getPrivateChatId(email1, email2) {
-            return [email1, email2].sort().join('_');
+        async function loadPrivateMessages(targetEmail) {
+            try {
+                const res = await fetch(`${API_URL}/private/messages?email1=${currentUser.email}&email2=${targetEmail}`);
+                const data = await res.json();
+                chatMessages.innerHTML = '';
+                (data.messages || []).forEach(msg => appendMessage(msg));
+                scrollToBottom();
+            } catch (e) {
+                console.error('Load private messages error:', e);
+            }
         }
 
-        function loadPrivateMessages(targetEmail) {
-            const chatId = getPrivateChatId(currentUser.email, targetEmail);
-            const db = getDB();
-            const messages = db.privateChats[chatId] || [];
-            chatMessages.innerHTML = '';
-            messages.forEach(msg => appendMessage(msg));
-            scrollToBottom();
+        // ============================================================
+        // POLLING (real-time sederhana)
+        // ============================================================
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(async () => {
+                if (chatPage.style.display !== 'flex') return;
+
+                if (currentChat === 'group') {
+                    try {
+                        const res = await fetch(`${API_URL}/group/messages`);
+                        const data = await res.json();
+                        const currentMsgCount = chatMessages.querySelectorAll('.msg').length;
+                        const newMsgCount = (data.messages || []).length;
+                        if (newMsgCount !== currentMsgCount) {
+                            chatMessages.innerHTML = '';
+                            (data.messages || []).forEach(msg => appendMessage(msg));
+                            scrollToBottom();
+                        }
+                    } catch (e) {}
+                } else if (currentChat && currentChat !== 'group') {
+                    try {
+                        const res = await fetch(
+                            `${API_URL}/private/messages?email1=${currentUser.email}&email2=${currentChat}`);
+                        const data = await res.json();
+                        const currentMsgCount = chatMessages.querySelectorAll('.msg').length;
+                        const newMsgCount = (data.messages || []).length;
+                        if (newMsgCount !== currentMsgCount) {
+                            chatMessages.innerHTML = '';
+                            (data.messages || []).forEach(msg => appendMessage(msg));
+                            scrollToBottom();
+                        }
+                    } catch (e) {}
+                }
+            }, 2000);
         }
 
         // ============================================================
@@ -1194,16 +1251,14 @@
         // ============================================================
         // SEND MESSAGE
         // ============================================================
-        function sendMessage() {
+        async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
 
             const isGroup = currentChat === 'group';
             const targetEmail = isGroup ? null : currentChat;
 
-            const db = getDB();
             const msgData = {
-                id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
                 senderEmail: currentUser.email,
                 senderUsername: currentUser.username,
                 senderIsOwner: currentUser.isOwner,
@@ -1212,34 +1267,34 @@
                     id: currentReply.id,
                     sender: currentReply.sender,
                     text: currentReply.text
-                } : null,
-                timestamp: new Date().toISOString()
+                } : null
             };
 
-            if (isGroup) {
-                db.groups[GROUP_ID].messages = db.groups[GROUP_ID].messages || [];
-                db.groups[GROUP_ID].messages.push(msgData);
-            } else {
-                const chatId = getPrivateChatId(currentUser.email, targetEmail);
-                db.privateChats[chatId] = db.privateChats[chatId] || [];
-                db.privateChats[chatId].push(msgData);
+            try {
+                let endpoint = isGroup ? `${API_URL}/group/message` : `${API_URL}/private/message`;
+                let body = isGroup ? msgData : { ...msgData, targetEmail };
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    appendMessage(result.message);
+                    scrollToBottom();
+                    if (!isGroup) loadPrivateChats();
+                }
+            } catch (e) {
+                console.error('Send error:', e);
             }
-
-            saveDB(db);
-
-            appendMessage(msgData);
-            scrollToBottom();
 
             chatInput.value = '';
             chatInput.style.height = 'auto';
             currentReply = null;
             replyIndicator.style.display = 'none';
             mentionPopup.classList.remove('show');
-
-            if (!isGroup) {
-                loadPrivateChats();
-            }
-
             chatInput.focus();
         }
 
@@ -1261,6 +1316,7 @@
         // BACK TO DASHBOARD
         // ============================================================
         chatBackBtn.onclick = () => {
+            if (pollingInterval) clearInterval(pollingInterval);
             showDashboard();
             loadPrivateChats();
         };
@@ -1273,46 +1329,51 @@
             loadAllUsers();
         };
 
-        function loadAllUsers() {
-            const db = getDB();
-            const users = Object.values(db.users);
+        async function loadAllUsers() {
+            try {
+                const res = await fetch(`${API_URL}/users`);
+                const data = await res.json();
+                const users = data.users || [];
 
-            users.sort((a, b) => {
-                if (a.isOwner && !b.isOwner) return -1;
-                if (!a.isOwner && b.isOwner) return 1;
-                return a.username.localeCompare(b.username);
-            });
+                users.sort((a, b) => {
+                    if (a.isOwner && !b.isOwner) return -1;
+                    if (!a.isOwner && b.isOwner) return 1;
+                    return a.username.localeCompare(b.username);
+                });
 
-            memberListContainer.innerHTML = '';
-            users.forEach(user => {
-                const div = document.createElement('div');
-                div.className = 'member-item';
-                const isSelf = user.email === currentUser.email;
-                div.innerHTML = `
-                    <span>${user.username} ${user.isOwner ? '⚡' : ''}</span>
-                    <span>
-                        ${user.isOwner ? '<span class="owner-label">OWNER</span>' : ''}
-                        ${isSelf ? '<span style="color:rgba(255,255,255,0.15);font-size:10px;margin-left:4px;">(you)</span>' : ''}
-                    </span>
-                `;
-                if (!isSelf) {
-                    const chatBtn = document.createElement('button');
-                    chatBtn.className = 'chat-btn';
-                    chatBtn.textContent = '✦ CHAT';
-                    chatBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        infoModal.classList.remove('show');
-                        openPrivateChat(user.email);
-                    };
-                    div.appendChild(chatBtn);
-                    div.style.cursor = 'pointer';
-                    div.onclick = () => {
-                        infoModal.classList.remove('show');
-                        openPrivateChat(user.email);
-                    };
-                }
-                memberListContainer.appendChild(div);
-            });
+                memberListContainer.innerHTML = '';
+                users.forEach(user => {
+                    const div = document.createElement('div');
+                    div.className = 'member-item';
+                    const isSelf = user.email === currentUser.email;
+                    div.innerHTML = `
+                        <span>${user.username} ${user.isOwner ? '⚡' : ''}</span>
+                        <span>
+                            ${user.isOwner ? '<span class="owner-label">OWNER</span>' : ''}
+                            ${isSelf ? '<span style="color:rgba(255,255,255,0.15);font-size:10px;margin-left:4px;">(you)</span>' : ''}
+                        </span>
+                    `;
+                    if (!isSelf) {
+                        const chatBtn = document.createElement('button');
+                        chatBtn.className = 'chat-btn';
+                        chatBtn.textContent = '✦ CHAT';
+                        chatBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            infoModal.classList.remove('show');
+                            openPrivateChat(user.email);
+                        };
+                        div.appendChild(chatBtn);
+                        div.style.cursor = 'pointer';
+                        div.onclick = () => {
+                            infoModal.classList.remove('show');
+                            openPrivateChat(user.email);
+                        };
+                    }
+                    memberListContainer.appendChild(div);
+                });
+            } catch (e) {
+                console.error('Load users error:', e);
+            }
         }
 
         closeModalBtn.onclick = () => infoModal.classList.remove('show');
@@ -1321,40 +1382,11 @@
         };
 
         // ============================================================
-        // AUTO REFRESH
-        // ============================================================
-        function autoRefresh() {
-            if (chatPage.style.display === 'flex') {
-                if (currentChat === 'group') {
-                    const db = getDB();
-                    const messages = db.groups[GROUP_ID].messages || [];
-                    const currentMsgCount = chatMessages.querySelectorAll('.msg').length;
-                    if (messages.length !== currentMsgCount) {
-                        loadGroupMessages();
-                    }
-                } else if (currentChat && currentChat !== 'group') {
-                    const chatId = getPrivateChatId(currentUser.email, currentChat);
-                    const db = getDB();
-                    const messages = db.privateChats[chatId] || [];
-                    const currentMsgCount = chatMessages.querySelectorAll('.msg').length;
-                    if (messages.length !== currentMsgCount) {
-                        loadPrivateMessages(currentChat);
-                    }
-                }
-            }
-            if (dashboardPage.style.display === 'flex') {
-                loadPrivateChats();
-            }
-        }
-
-        setInterval(autoRefresh, 3000);
-
-        // ============================================================
         // INIT
         // ============================================================
         showDashboard();
 
-        console.log('🔥 KAZZAH NEON active, Yang Mulia!');
+        console.log('🔥 KAZZAH NEON + Upstash active, Yang Mulia!');
         console.log(`👑 Owner: ${currentUser.isOwner ? 'YES' : 'NO'}`);
     </script>
 
