@@ -522,10 +522,7 @@
             font-family: 'Orbitron', monospace;
         }
 
-        .mention-popup .mention-item .mention-email {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.2);
-        }
+        /* 🔥 EMAIL DIHAPUS DARI MENTION 🔥 */
 
         .mention-popup .mention-empty {
             padding: 16px;
@@ -585,7 +582,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-radius: 8px;
-            color: #ffffff;  /* 🔥 USERNAME PUTIH 🔥 */
+            color: #ffffff;
         }
 
         .modal-box .member-item:hover {
@@ -834,7 +831,7 @@
         });
 
         // ============================================================
-        // MENTION SYSTEM
+        // MENTION SYSTEM - HANYA GROUP
         // ============================================================
         function getGroupUsers() {
             const db = getDB();
@@ -854,6 +851,13 @@
         }
 
         function handleMention() {
+            // Mention hanya aktif di GROUP CHAT
+            if (currentChat !== 'group') {
+                mentionPopup.classList.remove('show');
+                mentionActive = false;
+                return;
+            }
+
             const text = chatInput.value;
             const cursorPos = chatInput.selectionStart;
             const beforeCursor = text.substring(0, cursorPos);
@@ -881,7 +885,6 @@
                         div.innerHTML = `
                             <span class="mention-username">${user.username}</span>
                             ${user.isOwner ? '<span class="mention-owner">OWNER</span>' : ''}
-                            <span class="mention-email">${user.email}</span>
                         `;
                         div.onclick = () => {
                             selectMention(user.username);
