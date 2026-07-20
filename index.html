@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KAZZAH - Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0a0a12;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+        }
+
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            animation: floatOrb 8s ease-in-out infinite alternate;
+        }
+
+        .glow-orb.orb1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(0, 180, 255, 0.15);
+            top: -100px;
+            right: -100px;
+        }
+        .glow-orb.orb2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(100, 0, 255, 0.12);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: 4s;
+        }
+        .glow-orb.orb3 {
+            width: 200px;
+            height: 200px;
+            background: rgba(0, 255, 200, 0.08);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-duration: 12s;
+        }
+
+        @keyframes floatOrb {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                transform: translate(30px, -30px) scale(1.2);
+            }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            background: rgba(10, 10, 30, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 50px 40px;
+            border-radius: 32px;
+            max-width: 420px;
+            width: 100%;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            box-shadow:
+                0 0 60px rgba(0, 180, 255, 0.08),
+                inset 0 0 60px rgba(0, 180, 255, 0.03);
+            animation: containerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes containerGlow {
+            0% {
+                box-shadow: 0 0 40px rgba(0, 180, 255, 0.05), inset 0 0 40px rgba(0, 180, 255, 0.02);
+            }
+            100% {
+                box-shadow: 0 0 80px rgba(0, 180, 255, 0.12), inset 0 0 60px rgba(0, 180, 255, 0.04);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .logo .main {
+            font-family: 'Orbitron', monospace;
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc, #00d4ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease-in-out infinite;
+            text-shadow: 0 0 40px rgba(0, 180, 255, 0.3);
+            letter-spacing: 2px;
+        }
+
+        @keyframes gradientShift {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .logo .sub {
+            color: rgba(0, 200, 255, 0.6);
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-top: -4px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .login-form {
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(0, 200, 255, 0.7);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 200, 255, 0.15);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 16px;
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: rgba(0, 200, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 200, 255, 0.08);
+            background: rgba(0, 30, 60, 0.6);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-group .input-glow {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            transition: width 0.4s ease;
+            border-radius: 2px;
+        }
+
+        .form-group input:focus~.input-glow {
+            width: 80%;
+        }
+
+        .btn-login {
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            color: #fff;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.1) 100%);
+            pointer-events: none;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 50px rgba(0, 200, 255, 0.25), 0 0 100px rgba(123, 47, 252, 0.15);
+        }
+
+        .btn-login:active {
+            transform: scale(0.98);
+        }
+
+        .error-msg {
+            color: #ff4757;
+            font-size: 13px;
+            text-align: center;
+            min-height: 24px;
+            font-weight: 500;
+            text-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
+        }
+
+        .info-text {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 12px;
+            text-align: center;
+            margin-top: 12px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .info-text strong {
+            color: rgba(0, 200, 255, 0.6);
+            font-weight: 600;
+        }
+
+        .corner-line {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-color: rgba(0, 200, 255, 0.15);
+            border-style: solid;
+            border-width: 0;
+        }
+        .corner-line.tl {
+            top: 12px;
+            left: 12px;
+            border-top-width: 2px;
+            border-left-width: 2px;
+        }
+        .corner-line.tr {
+            top: 12px;
+            right: 12px;
+            border-top-width: 2px;
+            border-right-width: 2px;
+        }
+        .corner-line.bl {
+            bottom: 12px;
+            left: 12px;
+            border-bottom-width: 2px;
+            border-left-width: 2px;
+        }
+        .corner-line.br {
+            bottom: 12px;
+            right: 12px;
+            border-bottom-width: 2px;
+            border-right-width: 2px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 16px;
+                border-radius: 24px;
+            }
+            .logo .main {
+                font-size: 34px;
+            }
+            .logo .sub {
+                font-size: 11px;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow-orb orb1"></div>
+    <div class="glow-orb orb2"></div>
+    <div class="glow-orb orb3"></div>
+
+    <div class="login-container">
+        <div class="corner-line tl"></div>
+        <div class="corner-line tr"></div>
+        <div class="corner-line bl"></div>
+        <div class="corner-line br"></div>
+
+        <div class="logo">
+            <div class="main">KAZZAH</div>
+            <div class="sub">✦ Cyber Chat ✦</div>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label>📧 Email Address</label>
+                <input type="email" id="emailInput" placeholder="your@email.com" required />
+                <div class="input-glow"></div>
+            </div>
+
+            <div class="form-group">
+                <label>👤 Username</label>
+                <input type="text" id="usernameInput" placeholder="Enter your username" required />
+                <div class="input-glow"></div>
+            </div>
+
+            <div class="error-msg" id="errorMsg"></div>
+
+            <button type="submit" class="btn-login">⚡ Access System</button>
+
+            <div class="info-text">
+                <strong>⚡ Owner:</strong> jckoomhardika21@gmail.com / Kazzah
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const OWNER_EMAIL = 'jckoomhardika21@gmail.com';
+        const OWNER_USERNAME = 'Kazzah';
+        const GROUP_ID = 'groupUtama';
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('emailInput');
+        const usernameInput = document.getElementById('usernameInput');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Init database kalo belum ada
+        function initDatabase() {
+            if (!localStorage.getItem('kazzah_db')) {
+                const db = {
+                    users: {},
+                    groups: {
+                        [GROUP_ID]: {
+                            name: 'Group Utama',
+                            description: 'Diskusi bebas KAZZAH',
+                            members: [],
+                            messages: []
+                        }
+                    },
+                    privateChats: {}
+                };
+                localStorage.setItem('kazzah_db', JSON.stringify(db));
+            }
+
+            // Init owner kalo belum ada
+            const db = JSON.parse(localStorage.getItem('kazzah_db'));
+            if (!db.users[OWNER_EMAIL]) {
+                db.users[OWNER_EMAIL] = {
+                    email: OWNER_EMAIL,
+                    username: OWNER_USERNAME,
+                    isOwner: true,
+                    joinedAt: new Date().toISOString()
+                };
+                if (!db.groups[GROUP_ID].members.includes(OWNER_EMAIL)) {
+                    db.groups[GROUP_ID].members.push(OWNER_EMAIL);
+                }
+                localStorage.setItem('kazzah_db', JSON.stringify(db));
+            }
+        }
+
+        initDatabase();
+
+        loginForm.onsubmit = (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const username = usernameInput.value.trim();
+
+            if (!email || !username) {
+                errorMsg.textContent = '⚠️ All fields are required!';
+                return;
+            }
+
+            const db = JSON.parse(localStorage.getItem('kazzah_db'));
+
+            if (db.users[email]) {
+                // User exists
+                if (db.users[email].username === username) {
+                    localStorage.setItem('kazzah_user', JSON.stringify(db.users[email]));
+                    window.location.href = 'chat.html';
+                } else {
+                    errorMsg.textContent = '❌ Username doesn\'t match this email!';
+                }
+            } else {
+                // New user - register
+                const isOwner = (email === OWNER_EMAIL && username === OWNER_USERNAME);
+                const newUser = {
+                    email: email,
+                    username: username,
+                    isOwner: isOwner,
+                    joinedAt: new Date().toISOString()
+                };
+                db.users[email] = newUser;
+                if (!db.groups[GROUP_ID].members.includes(email)) {
+                    db.groups[GROUP_ID].members.push(email);
+                }
+                localStorage.setItem('kazzah_db', JSON.stringify(db));
+                localStorage.setItem('kazzah_user', JSON.stringify(newUser));
+                window.location.href = 'chat.html';
+            }
+        };
+    </script>
+
+</body>
+</html>
